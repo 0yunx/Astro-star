@@ -1,0 +1,47 @@
+---
+routeSlug: "hidden-draft-example"
+title: "Hidden Draft Example"
+description: "A draft article that stays in the repository but is not published to the site."
+createdAt: "2026-01-02"
+type: "Template"
+published: false
+---
+
+# Hidden Draft Example
+
+This article demonstrates how to keep writing in the repository without publishing it to the website.
+
+Because the frontmatter sets `published: false`, the build should skip this article in detail pages, listings, archives, RSS, and search indexing.
+
+---
+routeSlug: "my-project"
+title: "My Project"
+description: "A short project description."
+createdAt: "2026-06-15 23:05:26"
+projectUrl: "https://github.com/your-name/my-project"
+docUrl: "https://example.com/docs"
+published: true
+---
+# My Project
+
+Write your project introduction here.
+
+routeSlug：URL 使用的稳定短名，建议只用英文、小写和连字符。
+title：文章、笔记或项目标题。
+description：摘要，会用于列表页和 SEO 信息。
+createdAt：创建时间，省略时会优先从 Git 记录读取创建时间，再回退到文件系统时间；需要手动覆盖时再显式填写，格式示例："2026-06-15 23:05:26"。
+updatedAt：更新时间。省略时同样会从 Git 记录或文件系统时间回退；格式示例："2026-06-15 23:30:00"。
+type：文章分类或标签性质的展示字段。
+projectUrl：项目地址，仅项目页会展示为 GitHub 圆形图标链接。
+docUrl：项目文档地址，仅项目页会展示为文档圆形图标链接。
+image：社交分享图/SEO 图，通常写 /figures/xxx.png。
+published：设置为 false 时可作为草稿隐藏。
+
+写完配置和文章后，建议运行：
+
+pnpm check
+pnpm build
+
+如果构建失败，优先检查 frontmatter 字段是否缺失、日期是否写成字符串、图片路径是否存在，以及 MDX 语法是否闭合。
+
+https://hanlife02.com/project/astro-star/#%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86

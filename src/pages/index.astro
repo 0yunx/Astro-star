@@ -1,0 +1,120 @@
+---
+import { getCollection } from "astro:content";
+import HomePageContent from "../components/home/HomePageContent.astro";
+import { site } from "../config/site";
+import { socialDisplay } from "../config/social";
+import { getSocialLinks } from "../utils/social";
+import { resolveContentDates } from "../utils/content-dates";
+import { resolveContentSlug } from "../utils/content-slug";
+import {
+  getContentMonthDay,
+  getContentYear,
+  toContentIsoString,
+} from "../utils/content-time-zone";
+import { resolveContentTitle } from "../utils/content-title";
+import { isPublishedContentEntry } from "../utils/content-visibility";
+import { getGitTimestamps } from "../utils/git-timestamps";
+
+export const prerender = true;
+
+const { profile } = site;
+
+const latestBlogEntries = (await getCollection("blog")).filter(
+  isPublishedContentEntry,
+);
+const latestNoteEntries = (await getCollection("note")).filter(
+  isPublishedContentEntry,
+);
+
+interface LatestArticleItem {
+  title: string;
+  href: string;
+  pubDateIso: string;
+  createdAtIso: string;
+  updatedAtIso: string;
+  displayDate: string;
+  year: string;
+  timestamp: number;
+}
+
+interface LatestTimelineGroup {
+  year: string;
+  articles: LatestArticleItem[];
+}
+
+function buildLatestArticles(
+  entries:
+    | Awaited<typeof latestBlogEntries>
+    | Awaited<typeof latestNoteEntries>,
+  section: "blog" | "note",
+) {
+  const articles: LatestArticleItem[] = [];
+
+  for (const entry of entries) {
+    const title = resolveContentTitle(entry.id, entry.data.title);
+    const slug = resolveContentSlug(entry.id, entry.data.routeSlug);
+    const contentPath =
+      entry.filePath ?? `src/content/${section}/${entry.id}.mdx`;
+    const { createdAt: gitCreatedAt, updatedAt: gitUpdatedAt } =
+      getGitTimestamps(contentPath);
+    const { createdAt, updatedAt } = resolveContentDates(entry.data, {
+      createdAt: gitCreatedAt,
+      updatedAt: gitUpdatedAt,
+    });
+    const pubDate = createdAt ?? updatedAt;
+
+    if (!slug || !pubDate || Number.isNaN(pubDate.getTime())) continue;
+
+    articles.push({
+      title,
+      href: `/${section}/${slug}/`,
+      pubDateIso: toContentIsoString(pubDate),
+      createdAtIso: createdAt
+        ? toContentIsoString(createdAt)
+        : toContentIsoString(pubDate),
+      updatedAtIso: updatedAt
+        ? toContentIsoString(updatedAt)
+        : toContentIsoString(pubDate),
+      displayDate: getContentMonthDay(pubDate),
+      year: getContentYear(pubDate),
+      timestamp: pubDate.getTime(),
+    });
+  }
+
+  return articles.sort((a, b) => b.timestamp - a.timestamp);
+}
+
+function buildLatestTimelineGroups(latestArticles: LatestArticleItem[]) {
+  return latestArticles.reduce<LatestTimelineGroup[]>((groups, article) => {
+    const currentGroup = groups[groups.length - 1];
+
+    if (currentGroup?.year === article.year) {
+      currentGroup.articles.push(article);
+      return groups;
+    }
+
+    groups.push({ year: article.year, articles: [article] });
+    return groups;
+  }, []);
+}
+
+const latestBlogArticles = buildLatestArticles(latestBlogEntries, "blog").slice(
+  0,
+  4,
+);
+const latestNoteArticles = buildLatestArticles(latestNoteEntries, "note").slice(
+  0,
+  4,
+);
+const latestBlogTimelineGroups = buildLatestTimelineGroups(latestBlogArticles);
+const latestNoteTimelineGroups = buildLatestTimelineGroups(latestNoteArticles);
+const profileLinks = getSocialLinks(socialDisplay.home).slice(0, 4);
+---
+
+<HomePageContent
+  profile={profile}
+  ownerName={profile.name}
+  profileLinks={profileLinks}
+  latestBlogTimelineGroups={latestBlogTimelineGroups}
+  latestNoteTimelineGroups={latestNoteTimelineGroups}
+/>
