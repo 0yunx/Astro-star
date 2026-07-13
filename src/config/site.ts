@@ -1,7 +1,7 @@
 export const site = {
   profile: {
     name: "khuatcoung",
-    avatarSrc: "public\\author.svg",
+    avatarSrc: "/author.svg",
     bio: "A short line about you.",
     intro:
       "Hello, I'm khuátcoung. Welcome to my personal site! Here, I share my thoughts, projects, and experiences. Feel free to explore and connect with me.",
@@ -13,7 +13,7 @@ export const site = {
     url: "https://www.187360.xyz",
     description:
       "A personal site template for blogs, notes, projects, comments, and friend links.",
-    iconSrc: "public\\author.svg",
+    iconSrc: "/author.svg",
     startYear: 2026,
     beian: {
       icp: {
