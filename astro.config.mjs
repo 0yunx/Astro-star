@@ -3,7 +3,7 @@ import { defineConfig, envField } from "astro/config";
 import mdx from "@astrojs/mdx";
 import { unified } from "@astrojs/markdown-remark";
 import sitemap from "@astrojs/sitemap";
-import node from "@astrojs/node";
+// 已移除：node 适配器的导入
 import rehypeKatex from "rehype-katex";
 import remarkDirective from "remark-directive";
 import remarkMath from "remark-math";
@@ -16,10 +16,8 @@ import { site } from "./src/config/site.ts";
 // https://astro.build/config
 export default defineConfig({
   site: site.site.url,
-  output: "server",
-  adapter: node({
-    mode: "standalone",
-  }),
+  output: "static", // 已修改：由 "server" 改为 "static"
+  // 已移除：adapter: node(...) 配置
   env: {
     schema: {
       WALINE_SERVER_URL: envField.string({
